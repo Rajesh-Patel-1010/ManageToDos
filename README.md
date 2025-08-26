@@ -19,6 +19,22 @@ A full-stack Todo management application built with Spring Boot (backend), React
 - ✅ Production-grade Docker setup
 - ✅ Health checks and monitoring
 - ✅ RESTful API with proper HTTP status codes
+- ✅ JWT-based authentication (login/register)
+
+## 🔐 Authentication & Security
+
+- JWT tokens issued via `/api/auth/register` and `/api/auth/login`.
+- Send token in header for protected endpoints:
+  - `Authorization: Bearer <JWT>`
+- Frontend attaches the token automatically via an Axios interceptor.
+- Backend validates JWT with jjwt 0.11.5 and a 256-bit HS256 key.
+
+### Auth Endpoints
+
+| Method | Endpoint             | Body                                      | Description           |
+|--------|----------------------|-------------------------------------------|-----------------------|
+| POST   | `/api/auth/register` | `{ username, password, email }`          | Register + return JWT |
+| POST   | `/api/auth/login`    | `{ username, password }`                  | Login + return JWT    |
 
 ## 📋 Prerequisites
 

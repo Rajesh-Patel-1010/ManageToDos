@@ -6,7 +6,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -44,7 +43,7 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

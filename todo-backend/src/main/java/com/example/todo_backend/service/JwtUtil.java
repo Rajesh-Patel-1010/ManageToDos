@@ -15,8 +15,8 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private final String SECRET_KEY = "c1e2f3g4h5i6j7k8l9m0n1o2p3q4r5s6"; // 32 bytes (256-bit)
-    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 10; // 10 hours
+    private static final String SECRET_KEY = "c1e2f3g4h5i6j7k8l9m0n1o2p3q4r5s6"; // 32 bytes (256-bit)
+    private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 10; // 10 hours
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -39,7 +39,7 @@ public class JwtUtil {
                 .getBody();
     }
 
-    private Boolean isTokenExpired(String token) {
+    private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
@@ -63,8 +63,8 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public Boolean validateToken(String token, String username) {
+    public boolean validateToken(String token, String username) {
         final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+        return extractedUsername.equals(username) && !isTokenExpired(token);
     }
 } 

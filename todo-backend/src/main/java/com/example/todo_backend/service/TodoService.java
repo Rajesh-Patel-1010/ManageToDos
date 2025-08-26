@@ -2,25 +2,22 @@ package com.example.todo_backend.service;
 
 import com.example.todo_backend.dto.TodoRequest;
 import com.example.todo_backend.dto.TodoResponse;
+import com.example.todo_backend.exception.TodoNotFoundException;
 import com.example.todo_backend.model.Todo;
 import com.example.todo_backend.repository.TodoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class TodoService {
     private final TodoRepository todoRepository;
     private static final Logger logger = LoggerFactory.getLogger(TodoService.class);
 
-    @Autowired
     public TodoService(TodoRepository todoRepository) {
         this.todoRepository = todoRepository;
     }
@@ -28,13 +25,13 @@ public class TodoService {
     @PreAuthorize("isAuthenticated()")
     public List<TodoResponse> getAllTodos() {
         logger.info("Fetching all todos");
-        return todoRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+        return todoRepository.findAll().stream().map(this::toResponse).toList();
     }
 
     @PreAuthorize("isAuthenticated()")
     public TodoResponse getTodoById(Long id) {
         logger.info("Fetching todo with id: {}", id);
-        Todo todo = todoRepository.findById(id).orElseThrow(() -> new RuntimeException("Todo not found"));
+        Todo todo = todoRepository.findById(id).orElseThrow(() -> new TodoNotFoundException("Todo not found"));
         return toResponse(todo);
     }
 
@@ -55,7 +52,7 @@ public class TodoService {
     @Transactional
     public TodoResponse updateTodo(Long id, TodoRequest request) {
         logger.info("Updating todo with id: {}", id);
-        Todo todo = todoRepository.findById(id).orElseThrow(() -> new RuntimeException("Todo not found"));
+        Todo todo = todoRepository.findById(id).orElseThrow(() -> new TodoNotFoundException("Todo not found"));
         todo.setTitle(request.getTitle());
         todo.setDescription(request.getDescription());
         todo.setCompleted(request.isCompleted());
@@ -70,7 +67,7 @@ public class TodoService {
         logger.info("Deleting todo with id: {}", id);
         if (!todoRepository.existsById(id)) {
             logger.warn("Todo with id {} not found for deletion", id);
-            throw new RuntimeException("Todo not found");
+            throw new TodoNotFoundException("Todo not found");
         }
         todoRepository.deleteById(id);
         logger.info("Deleted todo with id: {}", id);

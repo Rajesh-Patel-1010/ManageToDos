@@ -1,8 +1,9 @@
 package com.example.todo_backend.service;
 
+import com.example.todo_backend.exception.EmailAlreadyExistsException;
+import com.example.todo_backend.exception.UserAlreadyExistsException;
 import com.example.todo_backend.model.User;
 import com.example.todo_backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,17 +15,20 @@ import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = new BCryptPasswordEncoder();
+    }
 
     public User registerUser(String username, String password, String email) {
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("Username already exists");
+            throw new UserAlreadyExistsException("Username already exists");
         }
         if (userRepository.findAll().stream().anyMatch(u -> u.getEmail().equals(email))) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException("Email already exists");
         }
         User user = new User();
         user.setUsername(username);

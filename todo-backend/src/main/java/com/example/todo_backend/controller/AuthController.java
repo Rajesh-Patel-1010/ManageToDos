@@ -5,20 +5,22 @@ import com.example.todo_backend.dto.AuthResponse;
 import com.example.todo_backend.model.User;
 import com.example.todo_backend.service.JwtUtil;
 import com.example.todo_backend.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
+
+    public AuthController(UserService userService, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.jwtUtil = jwtUtil;
+    }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+    public ResponseEntity<Object> register(@RequestBody AuthRequest request) {
         try {
             User user = userService.registerUser(request.getUsername(), request.getPassword(), request.getEmail());
             String token = jwtUtil.generateToken(user.getUsername());
@@ -29,10 +31,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<Object> login(@RequestBody AuthRequest request) {
         return userService.findByUsername(request.getUsername())
                 .filter(user -> userService.checkPassword(request.getPassword(), user.getPassword()))
-                .map(user -> ResponseEntity.<Object>ok(new AuthResponse(jwtUtil.generateToken(user.getUsername()))))
-                .orElse(ResponseEntity.status(401).body((Object) "Invalid credentials"));
+                .<ResponseEntity<Object>>map(user -> ResponseEntity.ok(new AuthResponse(jwtUtil.generateToken(user.getUsername()))))
+                .orElseGet(() -> ResponseEntity.status(401).body("Invalid credentials"));
     }
 } 
