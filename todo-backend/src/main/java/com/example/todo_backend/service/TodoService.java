@@ -7,6 +7,7 @@ import com.example.todo_backend.repository.TodoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,17 +25,20 @@ public class TodoService {
         this.todoRepository = todoRepository;
     }
 
+    @PreAuthorize("isAuthenticated()")
     public List<TodoResponse> getAllTodos() {
         logger.info("Fetching all todos");
         return todoRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
     }
 
+    @PreAuthorize("isAuthenticated()")
     public TodoResponse getTodoById(Long id) {
         logger.info("Fetching todo with id: {}", id);
         Todo todo = todoRepository.findById(id).orElseThrow(() -> new RuntimeException("Todo not found"));
         return toResponse(todo);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @Transactional
     public TodoResponse createTodo(TodoRequest request) {
         logger.info("Creating new todo: {}", request.getTitle());
@@ -47,6 +51,7 @@ public class TodoService {
         return toResponse(saved);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @Transactional
     public TodoResponse updateTodo(Long id, TodoRequest request) {
         logger.info("Updating todo with id: {}", id);
@@ -59,6 +64,7 @@ public class TodoService {
         return toResponse(updated);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @Transactional
     public void deleteTodo(Long id) {
         logger.info("Deleting todo with id: {}", id);
